@@ -1,0 +1,51 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dylib
+pens
+sens
+
+# Logs
+*.log
+logs/
+
+# Configuration with secrets
+.env
+*.conf
+!*.conf.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Compiled binaries
+*.exe
+*.out
+*.app
+
+# Debug
+*.dSYM/
+
+# Prerequisites
+*.d
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile.cmake
+
+# Docker
+docker-compose.override.yml
+
+# Temporary
+*.tmp
+*.temp
+*.bak
+

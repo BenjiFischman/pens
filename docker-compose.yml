@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  pens:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pens
+    restart: unless-stopped
+    
+    environment:
+      # IMAP Configuration (REQUIRED - set these in .env file)
+      - PENS_IMAP_SERVER=${PENS_IMAP_SERVER:-imap.gmail.com}
+      - PENS_IMAP_PORT=${PENS_IMAP_PORT:-993}
+      - PENS_IMAP_USERNAME=${PENS_IMAP_USERNAME}
+      - PENS_IMAP_PASSWORD=${PENS_IMAP_PASSWORD}
+      - PENS_IMAP_USE_SSL=${PENS_IMAP_USE_SSL:-true}
+      
+      # PENS Configuration (OPTIONAL)
+      - PENS_PRIORITY_THRESHOLD=${PENS_PRIORITY_THRESHOLD:-5}
+      - PENS_CHECK_INTERVAL=${PENS_CHECK_INTERVAL:-60}
+      - PENS_DEBUG_MODE=${PENS_DEBUG_MODE:-false}
+      - PENS_LOG_LEVEL=${PENS_LOG_LEVEL:-INFO}
+    
+    volumes:
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Optionally mount config file
+      - ./config/pens.conf:/app/config/pens.conf:ro
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /app/pens.log ] || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  default:
+    name: pens-network
+    driver: bridge
+
+volumes:
+  pens-logs:
+    driver: local
+
