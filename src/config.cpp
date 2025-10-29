@@ -103,6 +103,16 @@ bool Config::loadFromEnv() {
     const char* logLevel = std::getenv("PENS_LOG_LEVEL");
     if (logLevel) config_["log_level"] = logLevel;
     
+    // OAuth configuration
+    const char* authMethod = std::getenv("PENS_AUTH_METHOD");
+    if (authMethod) config_["auth_method"] = authMethod;
+    
+    const char* oauthAccessToken = std::getenv("PENS_OAUTH_ACCESS_TOKEN");
+    if (oauthAccessToken) config_["oauth_access_token"] = oauthAccessToken;
+    
+    const char* oauthRefreshToken = std::getenv("PENS_OAUTH_REFRESH_TOKEN");
+    if (oauthRefreshToken) config_["oauth_refresh_token"] = oauthRefreshToken;
+    
     LOG_INFO("Configuration loaded from environment variables");
     return true;
 }
@@ -141,6 +151,23 @@ bool Config::getDebugMode() const {
 
 std::string Config::getLogLevel() const {
     return getValue("log_level", "INFO");
+}
+
+std::string Config::getAuthMethod() const {
+    return getValue("auth_method", "password");
+}
+
+std::string Config::getOAuthAccessToken() const {
+    return getValue("oauth_access_token", "");
+}
+
+std::string Config::getOAuthRefreshToken() const {
+    return getValue("oauth_refresh_token", "");
+}
+
+bool Config::useOAuth() const {
+    std::string method = getAuthMethod();
+    return (method == "oauth" || method == "OAuth" || method == "OAUTH");
 }
 
 void Config::setImapServer(const std::string& server) {

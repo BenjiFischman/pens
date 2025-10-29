@@ -1,4 +1,5 @@
 #include "imap_client.hpp"
+#include "oauth_helper.hpp"
 #include "logger.hpp"
 #include <iostream>
 #include <sstream>
@@ -140,6 +141,38 @@ bool ImapClient::authenticate(const std::string& username, const std::string& pa
     }
     
     LOG_ERROR("Authentication failed");
+    return false;
+}
+
+bool ImapClient::authenticateOAuth(const std::string& username, const std::string& accessToken) {
+    if (!connected_) {
+        LOG_ERROR("Cannot authenticate: not connected");
+        return false;
+    }
+    
+    LOG_INFO("Authenticating with OAuth 2.0 as: " + username);
+    
+    // Generate XOAUTH2 authentication string
+    std::string xoauth2String = OAuthHelper::generateXOAuth2String(username, accessToken);
+    
+    // AUTHENTICATE XOAUTH2 command
+    std::string authCmd = "A002 AUTHENTICATE XOAUTH2 " + xoauth2String + "\r\n";
+    std::string response = sendCommand(authCmd);
+    
+    LOG_DEBUG("IMAP OAUTH response: " + response);
+    
+    if (response.find("OK") != std::string::npos) {
+        authenticated_ = true;
+        LOG_INFO("OAuth authentication successful");
+        return true;
+    }
+    
+    LOG_ERROR("OAuth authentication failed");
+    LOG_ERROR("This may be due to:");
+    LOG_ERROR("  - Invalid or expired access token");
+    LOG_ERROR("  - Insufficient permissions/scopes (need Mail.Read or similar)");
+    LOG_ERROR("  - XOAUTH2 not enabled on the server");
+    LOG_ERROR("  - Incorrect tenant configuration");
     return false;
 }
 

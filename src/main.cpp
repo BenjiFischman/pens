@@ -155,8 +155,28 @@ int main(int argc, char* argv[]) {
         }
         
         LOG_INFO("Authenticating...");
-        if (!client->authenticate(config.getImapUsername(), config.getImapPassword())) {
+        
+        // Use OAuth or password authentication based on configuration
+        bool authSuccess = false;
+        if (config.useOAuth()) {
+            LOG_INFO("Using OAuth 2.0 authentication");
+            std::string accessToken = config.getOAuthAccessToken();
+            if (accessToken.empty()) {
+                LOG_ERROR("OAuth access token not configured");
+                LOG_ERROR("Run: node scripts/oauth-token-helper.js to get a token");
+                return 1;
+            }
+            authSuccess = client->authenticateOAuth(config.getImapUsername(), accessToken);
+        } else {
+            LOG_INFO("Using password authentication");
+            authSuccess = client->authenticate(config.getImapUsername(), config.getImapPassword());
+        }
+        
+        if (!authSuccess) {
             LOG_ERROR("Authentication failed");
+            if (config.useOAuth()) {
+                LOG_ERROR("Try refreshing your OAuth token with: node scripts/oauth-token-helper.js");
+            }
             return 1;
         }
         

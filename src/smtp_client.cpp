@@ -1,4 +1,5 @@
 #include "smtp_client.hpp"
+#include "oauth_helper.hpp"
 #include "logger.hpp"
 #include <iostream>
 #include <sstream>
@@ -197,6 +198,35 @@ bool SmtpClient::authenticate(const std::string& username, const std::string& pa
     
     authenticated_ = true;
     LOG_INFO("SMTP authentication successful");
+    
+    return true;
+}
+
+bool SmtpClient::authenticateOAuth(const std::string& username, const std::string& accessToken) {
+    if (!connected_) {
+        LOG_ERROR("Cannot authenticate: not connected");
+        return false;
+    }
+    
+    LOG_INFO("Authenticating with OAuth 2.0 as: " + username);
+    username_ = username;
+    
+    // Generate XOAUTH2 authentication string
+    std::string xoauth2String = OAuthHelper::generateXOAuth2String(username, accessToken);
+    
+    // AUTH XOAUTH2
+    sendCommand("AUTH XOAUTH2 " + xoauth2String + "\r\n");
+    if (!readResponse(235)) {
+        LOG_ERROR("OAuth authentication failed");
+        LOG_ERROR("This may be due to:");
+        LOG_ERROR("  - Invalid or expired access token");
+        LOG_ERROR("  - Insufficient permissions/scopes");
+        LOG_ERROR("  - OAuth not enabled on the server");
+        return false;
+    }
+    
+    authenticated_ = true;
+    LOG_INFO("SMTP OAuth authentication successful");
     
     return true;
 }

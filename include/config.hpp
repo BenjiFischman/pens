@@ -24,6 +24,12 @@ public:
     std::string getImapUsername() const;
     std::string getImapPassword() const;
     
+    // OAuth settings
+    std::string getAuthMethod() const;  // "password" or "oauth"
+    std::string getOAuthAccessToken() const;
+    std::string getOAuthRefreshToken() const;
+    bool useOAuth() const;
+    
     // PENS settings
     int getPriorityThreshold() const;
     int getCheckInterval() const;

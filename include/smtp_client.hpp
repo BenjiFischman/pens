@@ -19,6 +19,7 @@ public:
     // Connection management
     bool connect();
     bool authenticate(const std::string& username, const std::string& password);
+    bool authenticateOAuth(const std::string& username, const std::string& accessToken);
     bool disconnect();
     bool isConnected() const;
     
