@@ -75,6 +75,8 @@ clean:
 	rm -f $(TARGET)
 	rm -f *.o
 	rm -f *.log
+	rm -f *.gcov *.gcda *.gcno
+	rm -f $(TEST_DIR)/*.tmp.log $(TEST_DIR)/*.tmp
 	@echo "✅ Clean complete!"
 
 # Clean everything including logs
@@ -89,10 +91,55 @@ run: $(TARGET)
 	@echo "Starting PENS..."
 	./$(TARGET)
 
-# Run tests (placeholder for future tests)
-test:
-	@echo "Running tests..."
-	@echo "   No tests implemented yet!"
+# Test configuration
+TEST_DIR = tests
+TEST_BUILD_DIR = $(BUILD_DIR)/tests
+TEST_TARGET = $(TEST_BUILD_DIR)/pens_tests
+TEST_SOURCES = $(wildcard $(TEST_DIR)/*.cpp)
+TEST_OBJECTS = $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS))
+CATCH_HEADER = $(TEST_DIR)/catch.hpp
+
+# Download Catch2 header if not present
+$(CATCH_HEADER):
+	@echo "📥 Downloading Catch2 testing framework..."
+	@mkdir -p $(TEST_DIR)
+	@curl -L -o $(CATCH_HEADER) https://raw.githubusercontent.com/catchorg/Catch2/v2.13.10/single_include/catch2/catch.hpp
+	@echo "✅ Catch2 downloaded successfully!"
+
+# Build tests
+$(TEST_TARGET): $(CATCH_HEADER) $(TEST_OBJECTS)
+	@echo "🧪 Building tests..."
+	@mkdir -p $(TEST_BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -I$(TEST_DIR) $(TEST_SOURCES) $(TEST_OBJECTS) -o $(TEST_TARGET) $(LDFLAGS)
+	@echo "✅ Tests built successfully!"
+
+# Run tests
+test: $(TEST_TARGET)
+	@echo "🧪 Running unit tests..."
+	@echo ""
+	$(TEST_TARGET)
+	@echo ""
+	@echo "✅ All tests completed!"
+
+# Run tests with verbose output
+test-verbose: $(TEST_TARGET)
+	@echo "🧪 Running unit tests (verbose)..."
+	$(TEST_TARGET) -s
+
+# Run specific test
+test-filter: $(TEST_TARGET)
+	@echo "🧪 Running filtered tests..."
+	$(TEST_TARGET) $(FILTER)
+
+# Run tests and show coverage (requires gcov)
+test-coverage: CXXFLAGS += --coverage
+test-coverage: LDFLAGS += --coverage
+test-coverage: clean $(TEST_TARGET)
+	@echo "🧪 Running tests with coverage..."
+	$(TEST_TARGET)
+	@echo "📊 Generating coverage report..."
+	@gcov $(SRC_DIR)/*.cpp
+	@echo "✅ Coverage report generated!"
 
 # Docker commands
 docker-build:
@@ -137,7 +184,10 @@ help:
 	@echo "  run          - Build and run the application"
 	@echo "  install      - Install to /usr/local/bin"
 	@echo "  uninstall    - Remove from /usr/local/bin"
-	@echo "  test         - Run tests (not implemented yet)"
+	@echo "  test         - Run unit tests"
+	@echo "  test-verbose - Run tests with verbose output"
+	@echo "  test-filter  - Run specific tests (use FILTER='[tag]')"
+	@echo "  test-coverage- Run tests with coverage report"
 	@echo "  check-deps   - Check if dependencies are installed"
 	@echo ""
 	@echo "Docker targets:"
@@ -177,7 +227,7 @@ info:
 	@echo "Target: $(TARGET)"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-.PHONY: all debug release clean distclean run test install uninstall \
-        docker-build docker-run docker-stop docker-logs docker-shell \
+.PHONY: all debug release clean distclean run test test-verbose test-filter test-coverage \
+        install uninstall docker-build docker-run docker-stop docker-logs docker-shell \
         check-deps help format analyze info
 

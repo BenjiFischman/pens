@@ -1,0 +1,21 @@
+# Test artifacts
+*.tmp
+*.tmp.log
+*.test
+*.o
+*.gcov
+*.gcda
+*.gcno
+
+# Test binaries
+pens_tests
+test_runner
+
+# Catch2 header (will be downloaded)
+# Uncomment if you want to commit it:
+# catch.hpp
+
+# Coverage reports
+coverage/
+*.info
+
