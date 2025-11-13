@@ -59,10 +59,40 @@ public:
         const std::string& redirectUri,
         const std::string& scope
     );
+
+    static std::string urlEncode(const std::string& value);
     
+    /**
+     * @brief Generate JWT assertion for certificate-based authentication
+     * 
+     * Creates a JWT signed with the private key for client assertion
+     * 
+     * @param clientId Azure AD application client ID
+     * @param tenantId Azure AD tenant ID
+     * @param certificatePath Path to certificate file (PEM format)
+     * @param privateKeyPath Path to private key file (PEM format)
+     * @return JWT assertion string or empty on error
+     */
+    static std::string generateClientAssertion(
+        const std::string& clientId,
+        const std::string& tenantId,
+        const std::string& certificatePath,
+        const std::string& privateKeyPath
+    );
+    
+    /**
+     * @brief Calculate SHA-1 thumbprint of certificate
+     * 
+     * Azure AD requires the certificate thumbprint to be registered
+     * 
+     * @param certificatePath Path to certificate file (PEM format)
+     * @return Base64-encoded SHA-1 thumbprint or empty on error
+     */
+    static std::string calculateCertificateThumbprint(const std::string& certificatePath);
+ 
 private:
     static std::string base64Encode(const std::string& input);
-    static std::string urlEncode(const std::string& value);
+    static std::string base64UrlEncode(const std::string& input);
 };
 
 } // namespace Pens

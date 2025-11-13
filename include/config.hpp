@@ -28,6 +28,13 @@ public:
     std::string getAuthMethod() const;  // "password" or "oauth"
     std::string getOAuthAccessToken() const;
     std::string getOAuthRefreshToken() const;
+    std::string getOAuthClientId() const;
+    std::string getOAuthTenantId() const;
+    std::string getOAuthScope() const;
+    std::string getOAuthTokenFile() const;
+    std::string getOAuthClientSecret() const;
+    std::string getOAuthCertificatePath() const;
+    std::string getOAuthPrivateKeyPath() const;
     bool useOAuth() const;
     
     // PENS settings

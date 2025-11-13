@@ -22,6 +22,18 @@ Config::Config() {
     config_["check_interval"] = "60";
     config_["debug_mode"] = "false";
     config_["log_level"] = "INFO";
+
+    // OAuth defaults
+    config_["auth_method"] = "password";
+    config_["oauth_access_token"] = "";
+    config_["oauth_refresh_token"] = "";
+    config_["oauth_client_id"] = "";
+    config_["oauth_tenant_id"] = "common";
+    config_["oauth_scope"] = "https://outlook.office365.com/IMAP.AccessAsUser.All https://outlook.office365.com/SMTP.Send offline_access";
+    config_["oauth_token_file"] = ".oauth_token.json";
+    config_["oauth_client_secret"] = "";
+    config_["oauth_certificate_path"] = "";
+    config_["oauth_private_key_path"] = "";
 }
 
 bool Config::loadFromFile(const std::string& filename) {
@@ -63,7 +75,11 @@ bool Config::loadFromFile(const std::string& filename) {
             value = value.substr(1, value.length() - 2);
         }
         
-        config_[key] = value;
+        // Normalize key (lowercase, handle underscores)
+        std::string normalizedKey = key;
+        std::transform(normalizedKey.begin(), normalizedKey.end(), normalizedKey.begin(), ::tolower);
+        
+        config_[normalizedKey] = value;
     }
     
     LOG_INFO("Configuration loaded from file: " + filename);
@@ -112,6 +128,27 @@ bool Config::loadFromEnv() {
     
     const char* oauthRefreshToken = std::getenv("PENS_OAUTH_REFRESH_TOKEN");
     if (oauthRefreshToken) config_["oauth_refresh_token"] = oauthRefreshToken;
+
+    const char* oauthClientId = std::getenv("PENS_OAUTH_CLIENT_ID");
+    if (oauthClientId) config_["oauth_client_id"] = oauthClientId;
+
+    const char* oauthTenantId = std::getenv("PENS_OAUTH_TENANT_ID");
+    if (oauthTenantId) config_["oauth_tenant_id"] = oauthTenantId;
+
+    const char* oauthScope = std::getenv("PENS_OAUTH_SCOPE");
+    if (oauthScope) config_["oauth_scope"] = oauthScope;
+
+    const char* oauthTokenFile = std::getenv("PENS_OAUTH_TOKEN_FILE");
+    if (oauthTokenFile) config_["oauth_token_file"] = oauthTokenFile;
+
+    const char* oauthClientSecret = std::getenv("PENS_OAUTH_CLIENT_SECRET");
+    if (oauthClientSecret) config_["oauth_client_secret"] = oauthClientSecret;
+
+    const char* oauthCertificatePath = std::getenv("PENS_OAUTH_CERTIFICATE_PATH");
+    if (oauthCertificatePath) config_["oauth_certificate_path"] = oauthCertificatePath;
+
+    const char* oauthPrivateKeyPath = std::getenv("PENS_OAUTH_PRIVATE_KEY_PATH");
+    if (oauthPrivateKeyPath) config_["oauth_private_key_path"] = oauthPrivateKeyPath;
     
     LOG_INFO("Configuration loaded from environment variables");
     return true;
@@ -163,6 +200,34 @@ std::string Config::getOAuthAccessToken() const {
 
 std::string Config::getOAuthRefreshToken() const {
     return getValue("oauth_refresh_token", "");
+}
+
+std::string Config::getOAuthClientId() const {
+    return getValue("oauth_client_id", "");
+}
+
+std::string Config::getOAuthTenantId() const {
+    return getValue("oauth_tenant_id", "common");
+}
+
+std::string Config::getOAuthScope() const {
+    return getValue("oauth_scope", "https://outlook.office365.com/IMAP.AccessAsUser.All https://outlook.office365.com/SMTP.Send offline_access");
+}
+
+std::string Config::getOAuthTokenFile() const {
+    return getValue("oauth_token_file", ".oauth_token.json");
+}
+
+std::string Config::getOAuthClientSecret() const {
+    return getValue("oauth_client_secret", "");
+}
+
+std::string Config::getOAuthCertificatePath() const {
+    return getValue("oauth_certificate_path", "");
+}
+
+std::string Config::getOAuthPrivateKeyPath() const {
+    return getValue("oauth_private_key_path", "");
 }
 
 bool Config::useOAuth() const {

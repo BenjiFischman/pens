@@ -3,7 +3,7 @@
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -I./include
-LDFLAGS = -lssl -lcrypto -lpthread
+LDFLAGS = -lssl -lcrypto -lpthread -lcurl
 
 # Directories
 SRC_DIR = src

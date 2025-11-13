@@ -2,6 +2,7 @@
 #include "notification_processor.hpp"
 #include "config.hpp"
 #include "logger.hpp"
+#include "oauth_token_manager.hpp"
 #include <iostream>
 #include <memory>
 #include <csignal>
@@ -130,6 +131,15 @@ int main(int argc, char* argv[]) {
     }
     
     LOG_INFO("Starting Professional Email Notification System (PENS)");
+
+    std::unique_ptr<OAuthTokenManager> oauthManager;
+    if (config.useOAuth()) {
+        oauthManager = std::make_unique<OAuthTokenManager>(config);
+        if (!oauthManager->ensureValidToken()) {
+            LOG_ERROR("Unable to obtain a valid OAuth access token");
+            return 1;
+        }
+    }
     
     // Validate configuration
     if (config.getImapUsername().empty()) {
@@ -174,10 +184,9 @@ int main(int argc, char* argv[]) {
         bool authSuccess = false;
         if (config.useOAuth()) {
             LOG_INFO("Using OAuth 2.0 authentication");
-            std::string accessToken = config.getOAuthAccessToken();
+            std::string accessToken = oauthManager ? oauthManager->getAccessToken() : config.getOAuthAccessToken();
             if (accessToken.empty()) {
-                LOG_ERROR("OAuth access token not configured");
-                LOG_ERROR("Run: node scripts/oauth-token-helper.js to get a token");
+                LOG_ERROR("OAuth access token not available");
                 return 1;
             }
             authSuccess = client->authenticateOAuth(config.getImapUsername(), accessToken);

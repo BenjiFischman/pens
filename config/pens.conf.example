@@ -27,6 +27,31 @@ log_level = INFO
 # Enable debug mode for detailed logging
 debug_mode = false
 
+# OAuth 2.0 Configuration (Optional)
+# ----------------------------------
+# For Microsoft 365 / Outlook.com, you can use OAuth 2.0 authentication
+# instead of passwords. This is more secure and recommended for production.
+#
+# Option 1: Certificate-Based Authentication (Recommended for Enterprise)
+# auth_method = oauth
+# oauth_client_id = your-azure-ad-client-id
+# oauth_tenant_id = common
+# oauth_certificate_path = certs/pens-cert.pem
+# oauth_private_key_path = certs/pens-key.pem
+# oauth_scope = https://outlook.office365.com/IMAP.AccessAsUser.All https://outlook.office365.com/SMTP.Send offline_access
+#
+# Option 2: Client Secret Authentication
+# auth_method = oauth
+# oauth_client_id = your-azure-ad-client-id
+# oauth_tenant_id = common
+# oauth_client_secret = your-client-secret
+# oauth_scope = https://outlook.office365.com/IMAP.AccessAsUser.All https://outlook.office365.com/SMTP.Send offline_access
+#
+# To set up certificate-based authentication:
+# 1. Run: node scripts/certificate-setup.js
+# 2. Upload the certificate to Azure AD (see script output)
+# 3. Configure the paths above
+#
 # Notes:
 # ------
 # For Gmail users:

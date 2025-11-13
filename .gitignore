@@ -19,6 +19,13 @@ logs/
 .oauth_env_snippet
 *.token
 
+# Certificates and private keys
+certs/
+*.pem
+*.key
+*.crt
+!*.pem.example
+
 # IDE
 .vscode/
 .idea/
