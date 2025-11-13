@@ -19,17 +19,25 @@ const rl = readline.createInterface({
 
 // Configuration
 const config = {
-  // For personal Microsoft accounts (Outlook.com, Hotmail, Live)
-  tenantId: 'consumers',  // Use 'common' for work/school accounts
+  // For Microsoft 365 / Outlook.com accounts
+  // Use 'common' for both personal and work accounts
+  // Use 'consumers' for personal accounts only
+  // Use 'organizations' for work/school accounts only
+  tenantId: 'consumers',  // Using consumers since app is registered for personal accounts
   
   // You need to register an app at:
   // https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
-  clientId: process.env.AZURE_CLIENT_ID || '',
+  // 
+  // REPLACE THIS WITH YOUR ACTUAL CLIENT ID FROM AZURE PORTAL:
+  clientId: process.env.AZURE_CLIENT_ID || 'PASTE-YOUR-CLIENT-ID-HERE',
   
   // Scopes needed for IMAP/SMTP
+  // Using Microsoft Graph scopes (works for both personal and work accounts)
   scopes: [
-    'https://outlook.office365.com/IMAP.AccessAsUser.All',
-    'https://outlook.office365.com/SMTP.Send',
+    'https://graph.microsoft.com/Mail.Read',
+    'https://graph.microsoft.com/Mail.ReadWrite',
+    'https://graph.microsoft.com/Mail.Send',
+    'https://graph.microsoft.com/User.Read',
     'offline_access'  // For refresh tokens
   ].join(' ')
 };

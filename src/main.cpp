@@ -132,10 +132,24 @@ int main(int argc, char* argv[]) {
     LOG_INFO("Starting Professional Email Notification System (PENS)");
     
     // Validate configuration
-    if (config.getImapUsername().empty() || config.getImapPassword().empty()) {
-        LOG_ERROR("IMAP username and password are required!");
+    if (config.getImapUsername().empty()) {
+        LOG_ERROR("IMAP username is required!");
         LOG_INFO("Use command line arguments or environment variables to configure.");
         printUsage(argv[0]);
+        return 1;
+    }
+    
+    // Check if we have either password or OAuth token
+    if (!config.useOAuth() && config.getImapPassword().empty()) {
+        LOG_ERROR("IMAP password is required when not using OAuth!");
+        LOG_INFO("Either set a password or configure OAuth with: node scripts/oauth-token-helper.js");
+        printUsage(argv[0]);
+        return 1;
+    }
+    
+    if (config.useOAuth() && config.getOAuthAccessToken().empty()) {
+        LOG_ERROR("OAuth access token is required when using OAuth authentication!");
+        LOG_INFO("Run: node scripts/oauth-token-helper.js to get OAuth tokens");
         return 1;
     }
     
